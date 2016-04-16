@@ -1,0 +1,593 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import Image, sys, os
+import PythonMagick
+
+file1 = "IMG_0146.jpg"
+file1 = "image16.jpg"
+file1 = "mdr16.tiff"
+file1 = "pnggrad16rgb.png"
+
+image = PythonMagick.Image(file1)
+print image.fileName()
+print image.magick()
+print image.size().width()
+print image.size().height()
+print image.depth()
+
+image.depth(8)
+
+nimage = image 
+print nimage.fileName()
+print nimage.magick()
+print nimage.size().width()
+print nimage.size().height()
+print nimage.depth()
+
+newf="image.jpg"
+nimage.write(newf)
+
+newf=file1
+image=Image.open( newf)
+#print "file:", newf, ", size:",image.size, ", bits", image.bits, ", mode:", image.mode, ", format:", image.format
+print "file:", newf, ", size:",image.size, ", mode:", image.mode, ", format:", image.format
+image.save("Image.jpg", "JPEG")
+
+image=Image.open( "Image.jpg")
+print "file:", newf, ", size:",image.size, ", bits", image.bits, ", mode:", image.mode, ", format:", image.format
+print "file:", newf, ", size:",image.size, ", mode:", image.mode, ", format:", image.format
+#image.save("Image.jpg", "JPG")
+
+#image.thumbnail((800,800), Image.ANTIALIAS)
+image.show()
+
+
+
+
+sys.exit()
+
+
+
+import Image,  sys, os
+import PythonMagick
+
+
+#os.system("killall display")
+
+#from PIL.ExifTags import TAGS
+#import ExifTags
+
+#path =  "/home/mm/bilder/timeline/2010-07 PCup2010 and Hawaii/PCup2010"
+path = ""
+fileName = "IMG_0146.jpg"
+image=Image.open( fileName)
+
+
+
+
+print "size:",image.size, "bits", image.bits
+ 
+a=image.info
+#print a 
+print "len(a)", len(a)
+print "type(a)", type(a)
+
+for i  in a["exif"]:
+    print "i=",i ,
+    #for j in i :
+    #    print j
+    print "len(i)", len(i)  
+    #print i[0]
+#print "a(0)\n",a["exif"]
+
+
+sys.exit()
+
+
+image.thumbnail((800,800), Image.ANTIALIAS)
+#image.show()
+
+#for orientation in ExifTags.TAGS.keys() : 
+#    print orientation, ExifTags.TAGS[orientation]
+#    if ExifTags.TAGS[orientation]=='Orientation' : break 
+exif=dict(image._getexif().items())
+
+#print image._getexif().items()
+#print exif
+
+
+
+
+#image.show()
+print "exif:", exif[274]
+orientation = 274 #ist orientation!
+
+
+
+if   exif[orientation] == 3 : 
+    image=image.rotate(180, expand=True)
+elif exif[orientation] == 6 : 
+    image=image.rotate(270, expand=True)
+elif exif[orientation] == 8 : 
+    image=image.rotate(90, expand=True)
+
+#imt = image.thumbnail((Image.THUMB_WIDTH , Image.THUMB_HIGHT), Image.ANTIALIAS)
+imt = image.thumbnail((500 , 500), Image.ANTIALIAS)
+#image.save("n"+fileName)
+#image.show()
+
+
+
+
+
+
+
+sys.exit()
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+#HelloImage - display an image file
+# Simon Peverett - October 2003
+# uses the PIL module: http://www.pythonware.com/products/pil/
+# developed using ActivePython 2.2: http://www.activestate.com
+
+import Tkinter 
+import Image            #PIL
+import ImageTk          #PIL
+import sys
+import getopt
+
+
+try:
+    if len(sys.argv) == 1:
+        raise ValueError, "No image filename specified"
+
+    bild = sys.argv[1]
+    #will raise file IO error if no file found
+    im = Image.open(bild) 
+
+    #print im.size, im.mode, im.format
+    #print im.size[0]
+
+    root = Tkinter.Tk()
+    root.geometry("900x480+0+0")
+
+    # add 20 to account for border defined in create_image
+    #canvas = Tkinter.Canvas(root, height=im.size[1]+20, width=im.size[0]+20)
+    canvas = Tkinter.Canvas(root, height=200, width=200, bg="green", relief="sunken", borderwidth=10)
+    canvas.pack()
+
+    photo = ImageTk.PhotoImage(im)
+    #photo = Tkinter.PhotoImage(file=bild)
+    #item = canvas.create_image(10,10,anchor=Tkinter.NW, image=photo)
+    item = canvas.create_image(0,0,image=photo)
+    Tkinter.mainloop()
+
+except Exception, e:
+    print >>sys.stderr, e
+    print "USAGE: HelloImage <image filename>"
+    sys.exit(1)
+
+
+    
+sys.exit()
+"""
+
+
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+ZetCode Tkinter tutorial
+
+In this script, we lay out images
+using absolute positioning.
+
+author: Jan Bodnar
+last modified: December 2010
+website: www.zetcode.com
+"""
+import sys
+import Image, ImageTk
+#from Tkinter import Tk, Label, BOTH
+#from Tkinter import *
+import Tkinter
+
+#from ttk import Frame, Style
+
+class Example(Tkinter.Frame):
+  
+    def __init__(self, parent):
+        Tkinter.Frame.__init__(self, parent)   
+         
+        #self.parent = parent
+        
+        self.initUI()
+        
+    def initUI(self):
+      
+        #self.parent.title("My Pics")
+        self.pack(fill=Tkinter.BOTH, expand=0)
+        #self.pack(fill=Tkinter.BOTH)
+        #self.pack(expand=1)
+
+        
+        minc = Image.open("i244.jpg")
+        minc = minc.resize((470,445))
+        
+        
+        mincol = ImageTk.PhotoImage(minc)
+        
+        #label3 = Tkinter.Label(self, image=mincol)
+        ##label3 = Tkinter.Label(self )
+        #label3.image = mincol
+        #label3.place(x=0, y=0)        
+        
+        #label4 = Tkinter.Label(self, text="holladihühühiann")
+        #label3 = Tkinter.Label(self )
+        #label4.image = mincol
+        #label4.place(x=0, y=0)  
+        #label4.pack()      
+
+
+        #minc = Image.open("red.jpg")
+        #minc.show()
+        #minc = minc.resize((100,100)) 
+        #minc.show()
+        # add 20 to account for border defined in create_image
+        canvas = Tkinter.Canvas(self, height=200, width=200, bg="green", relief="sunken", borderwidth=10)
+        #canvas.pack(side=Tkinter.TOP,fill=Tkinter.BOTH ,expand=0)
+        canvas.pack()
+        #self.pack(fill=Tkinter.BOTH, expand=1)
+                   
+        photo = ImageTk.PhotoImage(minc)
+        #item = canvas.create_image(10,10,anchor=Tkinter.NE, image=photo)
+        
+        #photo = Tkinter.PhotoImage(file="red.gif")
+        item = canvas.create_image(0, 0, image=photo)
+        #item = canvas.create_image(10,10, image=photo)
+        
+        #item = canvas.create_bitmap(100, 100, bitmap="warning", foreground="blue", background="white")
+
+        #print "item:", item
+                
+        #canvas.place(x=100,y=100)
+                  
+
+  
+root = Tkinter.Tk()
+root.geometry("900x880+0+0")
+root.title("roottitle")
+#app = Example(root)
+minc = Image.open("i244.jpg")
+minc = minc.resize((170,145))
+
+
+mincol = ImageTk.PhotoImage(minc)
+
+label3 = Tkinter.Label(root, image=mincol)
+##label3 = Tkinter.Label(self )
+label3.image = mincol
+label3.place(x=0, y=0)        
+label3.pack()
+   
+canvas = Tkinter.Canvas(root, height=200, width=600, bg="green", relief="sunken", borderwidth=10)
+canvas.pack()
+          
+photo = ImageTk.PhotoImage(minc)
+ 
+#photo = Tkinter.PhotoImage(file="red.gif")
+item = canvas.create_image(100, 100, image=photo)
+#item = canvas.create_image(10,10, image=photo)
+
+
+root.mainloop()  
+
+
+
+sys.exit()
+
+
+
+
+
+
+#!/usr/bin/env python
+
+
+import pygtk; pygtk.require('2.0')
+import gtk
+import sys
+import Image
+
+
+
+class Image_Example(object):
+
+	def pressButton(self, widget, data=None):
+		print "Pressed"
+
+	def delete_event(self, widget, event, data=None):
+		print "delete event occured"
+		gtk.main_quit()
+
+		return False
+
+	def destroy(self, widget, data=None):
+		gtk.main_quit()
+
+	def __init__(self, object):
+		#self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+		self.window = gtk.Window()
+		self.window.connect("delete_event", self.delete_event)
+		#self.window.connect("destroy", self.destroy)
+		#self.window.set_border_width(100)
+
+		#self.button = gtk.Button()
+		#self.button.connect("clicked", self.pressButton, None)
+		#self.button.connect_object("clicked", gtk.Widget.destroy, self.window)
+
+		self.image = gtk.Image()
+		#self.image.set_from_file("i244.jpg")
+		self.image.set_from_file(object)
+		self.image.show()
+		self.window.add(self.image)
+
+		#self.button.add(self.image)
+		#self.window.add(self.button)
+		#self.button.show()
+		self.window.show()
+
+	def main(self):
+		gtk.main()
+
+
+if __name__ == '__main__':
+
+	Image_Example("i244.jpg").main()
+
+
+
+
+
+
+
+sys.exit()
+
+
+
+
+
+
+
+
+#HelloImage - display an image file
+# Simon Peverett - October 2003
+# uses the PIL module: http://www.pythonware.com/products/pil/
+# developed using ActivePython 2.2: http://www.activestate.com
+
+from Tkinter import *
+import Image            #PIL
+import ImageTk          #PIL
+import sys
+import getopt
+
+
+try:
+    if len(sys.argv) == 1:
+        raise ValueError, "No image filename specified"
+
+    #will raise file IO error if no file found
+    im = Image.open(sys.argv[1]) 
+
+    #print im.size, im.mode, im.format
+    #print im.size[0]
+
+    root = Tk()
+
+    # add 20 to account for border defined in create_image
+    canvas = Canvas(root, height=im.size[1]+20, width=im.size[0]+20)
+    canvas.pack(side=LEFT,fill=BOTH,expand=1)
+
+    photo = ImageTk.PhotoImage(im)
+    item = canvas.create_image(10,10,anchor=NW, image=photo)
+    mainloop()
+
+except Exception, e:
+    print >>sys.stderr, e
+    print "USAGE: HelloImage <image filename>"
+    sys.exit(1)
+
+
+    
+sys.exit()
+
+    
+#!/usr/bin/python
+
+import sys
+import os 
+import subprocess
+
+
+# http://code.activestate.com/recipes/521918-pil-and-tkinter-to-display-images/
+
+
+"""This is a small script to demonstrate using Tk to show PIL Image objects.
+The advantage of this over using Image.show() is that it will reuse the
+same window, so you can show multiple images without opening a new
+window for each image.
+
+This will simply go through each file in the current directory and
+try to display it. If the file is not an image then it will be skipped.
+Click on the image display window to go to the next image.
+
+Noah Spurrier 2007
+"""
+
+import os, sys
+import Tkinter
+import Image, ImageTk
+
+def button_click_exit_mainloop (event):
+    event.widget.quit() # this will cause mainloop to unblock.
+
+root = Tkinter.Tk()
+root.bind("<Button>", button_click_exit_mainloop)
+root.geometry('+%d+%d' % (300,480))
+dirlist = os.listdir('.')
+old_label_image = None
+for f in dirlist:
+    try:
+        image1 = Image.open(f)
+        #root.geometry('%dx%d' % (image1.size[0],image1.size[1]))
+        root.geometry('+%d+%d' % (800,480))
+        tkpi = ImageTk.PhotoImage(image1)
+        label_image = Tkinter.Label(root, image=tkpi)
+        label_image.place(x=0,y=0,width=image1.size[0],height=image1.size[1])
+        root.title(f)
+        if old_label_image is not None:
+            old_label_image.destroy()
+        old_label_image = label_image
+        root.mainloop() # wait until user clicks the window
+    except Exception, e:
+        # This is used to skip anything not an image.
+        # Image.open will generate an exception if it cannot open a file.
+        # Warning, this will hide other errors as well.
+        pass
+
+root.destroy()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sys.exit()
+
+#os.system("mplayer -playlist http://www.wdr.de/wdrlive/media/einslive.m3u")
+
+#subprocess.call("mplayer -playlist http://www.wdr.de/wdrlive/media/einslive.m3u", shell=True)
+#subprocess.call("mplayer -playlist http://www.wdr.de/wdrlive/media/einslive.m3u")
+
+#pid = subprocess.Popen(["ls", "-al"]).pid
+#print pid
+
+#pid = subprocess.Popen(["mplayer", "-really-quiet", "-playlist", "http://www.wdr.de/wdrlive/media/einslive.m3u"]).pid
+#pid = subprocess.Popen(["mplayer", "-playlist http://www.wdr.de/wdrlive/media/einslive.m3u"]).pid
+#print "popenpid",pid
+
+retcode = subprocess.call(["mplayer", "-playlist", "http://www.wdr.de/wdrlive/media/einslive.m3u"])
+print retcode
+
+
+
+
+
+
+
+
+
+
+import Image
+
+
+background = Image.new("RGB",(800,480), "black")
+image = Image.open("testbilder/DCP_0005.JPG")
+
+w = image.size[0]
+h = image.size[1]
+wh = float(w) / float(h)
+r = 800./480.
+
+if wh < 1 : 
+    print"Tall format", w,h 
+    #image = image.rotate(90)  
+          
+    image = image.resize((int(480 * wh  ),480))
+
+#image.show()
+
+
+background.paste(image, (400 - image.size[0]/2,0))
+
+image = background
+#background.show()
+image.show()
+#bild2.show()
+
+
+
+
+
+
+
+
+
+
+
+
+assert False, "ein String %s " % 2345
+
+
+
+
+
+#def vprint(dprint = False, *args ):
+def vprint(*args, **kwargs ):
+    """Print args as a single line IF debug is true, or if dprint keyword is true."""
+
+    forceprint = False
+    for key in kwargs:
+        if key == "forceprint":
+            forceprint =kwargs[key]
+            
+        
+    l = ''
+    if debug or forceprint : 
+        for arg in args:
+            l += str(arg) +" "
+        #log.write(l + "\n")
+        print l 
+    #if kwargs['fprint'] == "force":
+    #    print kwargs['fprint'] 
+        
+    return
+    
+
+debug = False
+    
+vprint("1ab", "cd", "kkk", 333, debug, forceprint=True)
+ 
+debug = True    
+vprint("2ab", "cd", "kkk", 333, debug, forceprint=False)
+  
+debug = True   
+vprint("3ab", "cd", "kkk", 333, debug, forceprint=True)
+  
+  
+ 
+debug = True   
+vprint("4ab", "cd", "kkk", 333, debug)
+    

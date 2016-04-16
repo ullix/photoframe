@@ -1,0 +1,92 @@
+#!/usr/bin/python
+
+import sys
+import os
+import struct
+import usb.core
+import time
+import Image
+
+device = "SPF87H Mini Monitor"
+
+dev = usb.core.find(idVendor=0x04e8, idProduct=0x2034)
+
+if dev is None:
+    # before calling this script!
+    print "Could not find", device, " - Exiting\n"
+    sys.exit()
+
+print "Found", device 
+
+dev.ctrl_transfer(0xc0, 4 )    
+"""
+nr = 500
+for i in range(100, nr+1 ):
+  
+    dir = "ffmpeg/"
+    filename = "vid-%03d.jpg"% (i ) 
+ 
+    print dir, filename
+    image = Image.open(dir + filename)
+    image.save(dir + "i" + filename, "JPEG", quality=95)
+   
+"""
+
+bytes_written = 0
+pcount = 0
+sum_filesize = 0
+ts = time.time()
+dir = "ffmpeg/"
+#dir = "/media/SSD2H_/home/ullix/ffmpeg/"
+nr = 500
+for i in range(nr + 2):
+    
+    if i == 0:
+        filename = dir + "red.jpg"
+    elif i == nr + 1:
+        filename = dir + "blue.jpg"
+    else:
+        filename = dir + "ivid-%03d.jpg"% (i ) 
+        #filename = "ffmpeg/movie%d.jpg"% (i )
+    
+    filesize = os.path.getsize(filename)   
+    sum_filesize += filesize 
+    #print filename, filesize
+    
+    
+    # Open the picture file and read into a string
+    infile = open(filename, "rb")
+    pic = infile.read()
+    infile.close()
+    
+    # The photo frame expects a header of 12 bytes, followed by the picture data.
+    # The first 4 and the last 4 bytes are always the same.
+    # The middle 4 bytes are the picture size (excluding the header) with the least significant byte first
+    rawdata = b"\xa5\x5a\x18\x04" + struct.pack('<I', len(pic)) + b"\x48\x00\x00\x00" + pic
+       
+    # The photo frame expects transfers in complete chunks of 16384 bytes (=2^14 bytes). 
+    # If last chunk of rawdata is not complete, then make it complete by padding with zeros. 
+    pad = 16384 - (len(rawdata) % 16384) 
+    tdata = rawdata + pad * b'\x00' 
+    
+    # For unknown reasons, some pictures will only transfer successfully, when at least one 
+    # additional zero byte is added. Possibly a firmware bug of the frame?
+    #tdata = tdata + b'\x00'
+    
+    # Write the data. Must write to USB endpoint 2
+    endpoint = 0x02
+    
+    bytes_written += dev.write(endpoint, tdata )
+    pcount += 1
+
+te = time.time()
+    
+sum = bytes_written 
+td = te -ts
+print "time lapsed writing:", td, "sec"
+print "total no of pictures transferred:", pcount, ", rate: ", int(100.0 * pcount / td)/100., "Bilder/sec"
+
+print "total no of bytes transferred:", sum, ", rate:", int(sum/td/1000.), "kB/sec"
+
+print "bytes by picture size:", sum_filesize, "rate:", int(sum_filesize/td/1000.), "kB/sec"
+print "transfer overhead: ", int(((float(sum)/float(sum_filesize)) - 1.)*100.), "%"

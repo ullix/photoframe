@@ -1,0 +1,1 @@
+cmd_/home/ullix/websites/local/photoframe/spfb_20101031/spfb.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-3.0.0-13-generic/scripts/module-common.lds --build-id  -o /home/ullix/websites/local/photoframe/spfb_20101031/spfb.ko /home/ullix/websites/local/photoframe/spfb_20101031/spfb.o /home/ullix/websites/local/photoframe/spfb_20101031/spfb.mod.o

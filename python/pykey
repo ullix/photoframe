@@ -1,0 +1,282 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+"""Module docstring.
+This serves as a long usage message.
+"""
+
+import sys
+import os
+import getopt
+import subprocess
+import time
+
+__author__ = "ullix"
+__copyright__ = "Copyright 2011"
+__credits__ = [""]
+__license__ = "GPL"
+__version__ = "0.0.1"
+__maintainer__ = ""
+__email__ = ""
+__status__ = "Prototype"
+
+exepath = "/home/ullix/projects/photoframe/python/"
+exepath = ""    #pyframe is moved to "/usr/local/bin"
+
+debug       = True #False
+verbose     = False
+
+def vprint(*args ):
+    """Print args as a single line IF debug is true."""
+
+    l = ''
+    if debug :       
+        for arg in args:
+            l += str(arg)
+        #log = open(exepath + 'pykey.log', 'a')        
+        log = open("/var/log/pyframe/pykey.log", 'a')
+        log.write(l + "\n")
+        log.close()
+        print l 
+
+
+def sound_off():
+    os.system("killall mplayer")
+    os.system("killall chromium-browser")    
+
+
+def show_text(text):
+    vprint("text to show:", text)
+    #subprocess.Popen([exepath + "pyframe", "-d", "-k", text])      # WITH Debug Option
+    subprocess.Popen([exepath + "pyframe", "-k", text])             # WITHOUT Debug Option
+
+
+def play(keytext, url, soundoff=True):
+    if soundoff:
+        sound_off()
+    show_text(keytext)
+    #os.system("mplayer " + url)
+    subprocess.Popen("mplayer " + url , shell=True)
+    
+
+def exekey(keycode):
+    
+    kc = keycode.replace(" ", "")
+    vprint ("keycode >%s<, kc >%s<" % (keycode, kc))
+
+    #1 Live    
+    if kc == "1live":
+        play("1 Live", "-playlist http://www.wdr.de/wdrlive/media/einslive.m3u")
+
+    #WDR 2    
+    elif kc == "wdr2":
+        play("WDR 2", "-playlist http://www.wdr.de/wdrlive/media/wdr2.m3u")
+
+    #WDR 5
+    elif kc == "wdr5":
+        play("WDR 5", "-playlist http://www.wdr.de/wdrlive/media/wdr5.m3u")
+ 
+    #SWR 3
+    elif kc == "swr3":
+        play("SWR 3", "http://swr.ic.llnwd.net/stream/swr_mp3_m_swr3b")
+
+    #NDR 1
+    elif kc == "ndr1":
+        play("NDR 1", "http://ndrstream.ic.llnwd.net/stream/ndrstream_ndr1niedersachsen_hi_mp3")
+
+    #NDR 2
+    elif kc == "ndr2":
+        play("NDR 2", "http://ndrstream.ic.llnwd.net/stream/ndrstream_ndr2_hi_mp3")
+
+    #NDR 90,3
+    elif kc == "ndr90,3":
+        play("NDR 90,3", " http://ndrstream.ic.llnwd.net/stream/ndrstream_ndr903_hi_mp3")
+
+    #KOIT 96.5 via Firefox
+    #    elif kc == "Shift+Mod4+F12":
+    #        keytext = "KOIT 96.5"
+    #        #os.system(exepath % keytext)
+    #        os.system("firefox -new-tab http://player.streamtheworld.com/_players/entercom/player/?id=KOIT")
+
+
+    #KOIT 96.5 via Chromium
+    elif kc == "koit":
+        sound_off()
+        show_text("KOIT 96.5")
+        #os.system("chromium-browser -app=http://player.streamtheworld.com/_players/entercom/player/?id=KOIT")
+        subprocess.Popen(["chromium-browser", "-app=http://player.streamtheworld.com/_players/entercom/player/?id=KOIT"])
+
+                
+    #Bayern 2
+    elif kc == "bay2":
+        play("Bay 2", "-playlist http://streams.br-online.de/bayern2_2.m3u")
+
+    #Bayern 3
+    elif kc == "bay3":
+        play("Bay 3", "-playlist http://streams.br-online.de/bayern3_2.m3u")
+
+    #Bayern 5 aktuell
+    elif kc == "bay5akt":
+        play("Bay 5 akt", " -playlist http://streams.br-online.de/b5aktuell_2.m3u")
+
+    #Bayern 5 plus
+    elif kc == "bay5pls":
+        play("Bay 5 pls", "-playlist http://streams.br-online.de/b5plus_2.m3u")
+
+    #Hilfe    h
+    elif kc == "hilfe":
+        os.system("killall pyframe")
+        show_text("Hilfe")
+
+    #Info    i
+    elif kc == "info":
+        os.system("killall pyframe")
+        show_text("Info")
+
+    #Diaschau    d
+    elif kc == "diaschau":
+        show_text("Diaschau")
+        #options = "-d -r -t 10 --gthumb=urlaub"                # WITH Debug Option
+        options = "-r -t 10 --gthumb=all"                    # WITHOUT Debug Option
+        subprocess.Popen([exepath + "pyframe"] + options.split()) 
+
+    #Diaschau Aus    Shift+d
+    elif kc == "diaschau-aus":
+        os.system("killall pyframe")
+        show_text(" ")
+
+    #Spacebar
+    elif kc == "spacebar":
+        os.system("killall pyframe")
+        show_text(" ")        
+                
+    #Ton Aus    ESC
+    elif kc == "ton-aus":
+        sound_off()
+        show_text("Ton aus")
+
+    #Alles Aus      Alt+ESC
+    elif kc == "alles-aus":
+        sound_off()
+        os.system("killall pyframe")
+        show_text("Alles aus")
+
+    #Musik per win+alt (inactiv)
+    elif kc == "Alt+Mod2+Mod4+m":
+        sound_off()
+        play("Musik", "-shuffle /home/mm/music/*/*/*")
+        #os.system("mplayer -shuffle /home/mm/music/*/*/* ")
+
+    #Musik  m
+    elif kc == "music":
+        sound_off()
+        play("Musik Mix", "-shuffle /home/mm/music/*/*/*")
+        #os.system("mplayer -shuffle /home/mm/music/*/*/* ")
+
+    #Musik Country     Alt+c
+    elif kc == "music-country":
+        play("Country", "-v -shuffle  /home/mm/music/'Johnny Cash and Don Williams'/*/*")
+
+    #Musik Film/Musical     Alt+f
+    elif kc == "music-film-musical":
+        play("Film/Musical", "-v -shuffle  '/home/mm/music/Film and Musical'/*/*")
+
+    #Musik Jazz     Alt+j
+    elif kc == "music-jazz":
+        play("Jazz", "-v -shuffle  /home/mm/music/Jazz/*/*")
+
+    #Musik Partymix     Alt+p
+    elif kc == "music-partymix":
+        play("Partymix", "-v -shuffle  /home/mm/music/Partymix/*")
+
+    #Musik Rock 'n Roll     Alt+r
+    #bisher nur Beatles
+    elif kc == "music-rocknroll":
+        play("Rock 'n Roll", "-v -shuffle  /home/mm/music/Beatles/*/*")
+
+    #Musik Schlager     Alt+s
+    elif kc == "music-schlager":
+        play("Schlager", "-v -shuffle  /home/mm/music/Schlager/*/*")
+
+
+    #Undefined keycode
+    else:
+        sound_off()
+        os.system("killall pyframe")
+        show_text("?: " + keycode)
+                
+    return
+         
+     
+def main(argv=None):
+    global debug, verbose, log 
+
+    usage = """
+    Usage:  pykey.py [Options]
+    
+    Options:
+        -h, --help          Show this help.
+        -d, --debug         Print debug information. 
+        -v, --verbose       Be more verbose (not active yet).
+        -V, --Version       Zeige Version.
+        -k, --key=Keys      Keys corresponds to the keycodes as reported by xbindkeys
+                            Example: Win + F2 :   "Mod4 + F2" (in quotes if blanks present)     
+    """
+
+    keyoption = False
+
+    # parse command line options
+    if argv is None:
+        argv = sys.argv    
+
+    try:
+        opts, args = getopt.getopt(argv[1:], "hdvVk:", ["help", "debug", "verbose", "Version","key="] )
+        #vprint("opt:", opts, "args:", args)
+    except getopt.GetoptError, err :
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        print usage
+        return 2
+    
+    # processing options
+    for opt, optval in opts:    
+        if opt in ("-h", "--help"):
+            print usage
+            return 0
+            
+        elif opt in ("-V", "--Version"):
+            print "Version:", __version__
+            return 0   
+                                   
+        elif opt in ("-d", "--debug"):
+            debug = True
+                      
+        elif opt in ("-v", "--verbose"):
+            verbose = True
+      
+        elif opt in ("-k", "--key"):
+            keyoption = optval            
+                                  
+        else:
+            print "Programming error 'unhandled option': %s" % opt    # programming error! opt is in getopt above, but not handled here
+            return 1
+            
+   
+    if debug:
+        vprint("\n"+ time.strftime("%d.%m.%Y %H:%M") + "--------------\n")
+        vprint("sys.argv= %s \n" % sys.argv)
+        vprint("Debug was set to True")
+        
+    if verbose:
+        vprint("Verbose was set to True")    
+
+    if keyoption:
+        vprint( "Keyoption was set to '%s'" % keyoption)
+        exekey(keyoption)            
+        vprint( "exekey done with keyoption: '%s'" % keyoption)    
+
+
+
+if __name__ == "__main__": 
+    main()
+    #print "pykey main completed"
+    

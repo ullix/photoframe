@@ -1,0 +1,82 @@
+#!/usr/bin/python
+
+import sys
+import os
+import struct
+import usb.core
+import time
+
+device = "SPF87H Mini Monitor"
+
+dev = usb.core.find(idVendor=0x04e8, idProduct=0x2034)
+
+if dev is None:
+    print "Could not find", device, " - Exiting\n"
+    sys.exit()
+
+print "Found", device 
+
+dev.ctrl_transfer(0xc0, 4 )    
+
+if len(sys.argv) < 3:
+    print "I need 2 pictures  - Exiting."
+    sys.exit() 
+
+filename1 = sys.argv[1]
+filename2 = sys.argv[2]
+filesize1 = os.path.getsize(filename1)
+filesize2 = os.path.getsize(filename2)
+print "Pictures to show are:", filename1, "filesize:", filesize1
+print "Pictures to show are:", filename2, "filesize:", filesize2
+
+# Open the picture file and read into a string
+infile1 = open(filename1, "rb")
+pic1 = infile1.read()
+infile1.close()
+
+infile2 = open(filename2, "rb")
+pic2 = infile2.read()
+infile2.close()
+
+# The photo frame expects a header of 12 bytes, followed by the picture data.
+# The first 4 and the last 4 bytes are always the same.
+# The middle 4 bytes are the picture size (excluding the header) with the least significant byte first
+rawdata1 = b"\xa5\x5a\x18\x04" + struct.pack('<I', len(pic1)) + b"\x48\x00\x00\x00" + pic1
+rawdata2 = b"\xa5\x5a\x18\x04" + struct.pack('<I', len(pic2)) + b"\x48\x00\x00\x00" + pic2
+
+# The photo frame expects transfers in complete chunks of 16384 bytes (=2^14 bytes). 
+# If last chunk of rawdata is not complete, then make it complete by padding with zeros. 
+pad1 = 16384 - (len(rawdata1) % 16384) 
+tdata1 = rawdata1 + pad1 * b'\x00' 
+
+pad2 = 16384 - (len(rawdata2) % 16384) 
+tdata2 = rawdata2 + pad2 * b'\x00' 
+
+# For unknown reasons, some pictures will only transfer successfully, when at least one 
+# additional zero byte is added. Possibly a firmware bug of the frame?
+#tdata1 = tdata1 + b'\x00'
+#tdata2 = tdata2 + b'\x00'
+
+# Write the data. Must write to USB endpoint 2
+endpoint = 0x02
+
+bytes_written1 = 0
+bytes_written2 = 0
+
+ts = time.time()
+nr = 100
+for i in range(nr):
+    bytes_written1 += dev.write(endpoint, tdata1 )
+    bytes_written2 += dev.write(endpoint, tdata2 )   
+    
+te = time.time()
+
+sum = bytes_written1 + bytes_written2
+td = te -ts
+print "time lapsed writing:", td, "sec"
+
+print "total no of pictures transferred:", nr * 2, ", rate: ", "%02.1f Bilder/sec"% (nr * 2 / td)
+print "total no of bytes transferred:", sum, ", rate:",  "%03d kB/sec"%(sum/td/1000.)
+
+sumfs = nr * (filesize1 + filesize2)
+print "transfer overhead: %3d%% " % ((100.*sum/sumfs) - 100.)

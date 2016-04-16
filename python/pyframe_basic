@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+# To use the 'Samsung SPF-87H Digital Photo Frame' in Mini Monitor mode, e.g. to serve as a
+# second monitor use 'pyframe_basic' as the most simple script for basic functionality
+# Tested under Linux (Ubuntu Lucid) with Python 2.6.5 and 3.2.2+. Expected to also work 
+# under Windows, but that was not tested
+#
+# usage: /path/to/pyframe_basic  [/path/to/picture.jpg]
+#
+#   The frame then displays picture.jpg. If none is provided, the frame remains unchanged.
+#   The frame does ONLY show JPEG pictures, therefore any content must be provided as a
+#   JPEG picture, strictly with the frame resolution of 800x480 pixel (width x height)
+#
+# To avoid having to run a script as root (required for write access to USB) it is suggested
+# to define a udev rule. This has the additional benefit that the frame will be caught as 
+# soon as it is connected in Mini Monitor mode, and it will be hold in this mode permanently
+# (and show a welcome.jpg picture if provided). Then the script can be used as a regular user:
+#
+#   As root create a file '50-samsung_SPF87H.rules' in '/etc/udev/rules.d' with the content:
+#    
+#      SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", 
+#      GROUP="plugdev" RUN+="/path/to/pyframe_basic /path/to/welcome.jpg" 
+#  
+#   (Don't forget to replace the two '/path/to/' with the paths of your installation!)    
+#   In Ubuntu Lucid the the regular users do belong to the group plugdev. Verify that they also
+#   do in your version. If not create the group. It might also work to select a different group
+#   to which everybody belongs.
+# 
+#   Execute 'sudo restart udev' to activate the new rule.
+
+# The Samsung SPF-87H Digital Photo Frame :
+#   is an 8" frame with a resolution of 800x480 pixel (width x height)
+#   in Mini-Monitor mode has the IDs on the USB bus: idVendor:0x04e8, idProduct:0x2034
+#   in Mass storage mode has the IDs on the USB bus: idVendor:0x04e8, idProduct:0x2033
+#   in Photo Frame mode is NOT registered on the USB bus
+#   The firmware in use is 1007.0 (full version name: M-IR8HSBWW-1007.0)
+#   copyright ullix
+
+
+import sys
+import struct
+
+# The PyUSB 1.0 module is needed, available here: http://sourceforge.net/apps/trac/pyusb/
+# Note: Do NOT use the python-usb package from the Ubuntu Lucid repositories,
+# since this is incompatible version 0.4! If already installed, then uninstall first before
+# installing PyUSB 1.0 ! 
+import usb.core
+
+device = "SPF87H Mini Monitor"
+
+# This function searches the USB bus for a device with the specified IDs.
+# If found an object is returned representing the device,
+# if not found, then 'None' is returned
+dev = usb.core.find(idVendor=0x04e8, idProduct=0x2034)
+
+if dev is None:
+    # SPF87H Mini Monitor not found. 
+    # Remember the frame must be connected AND be switched to Mini Monitor mode at the frame,
+    # before calling this script!
+    print "Could not find", device, " - Exiting\n"
+    sys.exit()
+
+print "Found", device 
+
+# This control function is required to keep the frame permanently in Mini Monitor mode. 
+# When the frame is switched to Mini Monitor mode, it remains there for a few seconds, but
+# then switches back, unregistering from the USB bus.
+# This function is needed only once after connection of the frame, but it does not seem
+# to do any harm when transfered with every picture transfer
+dev.ctrl_transfer(0xc0, 4 )    
+
+# If no picture is given on the command line, then stop here.
+# (first argument of sys.argv is the filename of the script)
+if len(sys.argv) < 2:
+    print "No picture given  - Exiting."
+    sys.exit() 
+
+filename = sys.argv[1]
+print "Picture to show is:", filename
+
+# Open the picture file and read into a string
+infile = open(filename, "rb")
+pic = infile.read()
+infile.close()
+
+# The photo frame expects a header of 12 bytes, followed by the picture data.
+# The first 4 and the last 4 bytes are always the same.
+# The middle 4 bytes are the picture size (excluding the header) with the least significant byte first
+rawdata = b"\xa5\x5a\x18\x04" + struct.pack('<I', len(pic)) + b"\x48\x00\x00\x00" + pic
+
+# The photo frame expects transfers in complete chunks of 16384 bytes (=2^14 bytes). 
+# If last chunk of rawdata is not complete, then make it complete by padding with zeros. 
+pad = 16384 - (len(rawdata) % 16384) 
+tdata = rawdata + pad * b'\x00' 
+
+# For unknown reasons, some pictures will only transfer successfully, when at least one 
+# additional zero byte is added. Possibly a firmware bug of the frame?
+tdata = tdata + b'\x00'
+
+# Write the data. Must write to USB endpoint 2
+endpoint = 0x02
+bytes_written = dev.write(endpoint, tdata )
+
+print "Have written", bytes_written, "bytes to photo frame"
+

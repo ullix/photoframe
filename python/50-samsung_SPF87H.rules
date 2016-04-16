@@ -1,0 +1,20 @@
+#alles geht. hex Zahlen muessen OHNE die Anfangs-"0x" geschrieben werden! falsch:"0x04e8" richtig:"04e8"
+
+# Samsung SPF-87H in Mini Monitor Mode
+#SUBSYSTEM=="usb", ACTION=="add", ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/websites/local/photoframe/working/pframe init"
+#ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/websites/local/photoframe/working/pframe init"
+
+# next line to use the simple version of pyframe
+# SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/projects/photoframe/python/pyframe_basic /home/ullix/projects/photoframe/python/red.jpg"
+# SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/projects/photoframe/python/pyframe_basic /home/ullix/projects/photoframe/python/blue.jpg"
+# SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="pyframe_basic /home/ullix/projects/photoframe/python/blue.jpg"
+SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/usr/local/bin/pyframe_init"
+# SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/projects/photoframe/python/pyframe  init"
+# SYSFS{idVendor}=="04e8", SYSFS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/projects/photoframe/python/pyframe"
+# ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="2034", MODE="0666", OWNER="root", GROUP="plugdev", RUN+="/home/ullix/projects/photoframe/python/pyframe init"
+
+# Samsung SPF-87H in Mass Storage mode
+ATTRS{idVendor}=="04e8", ATTRS{idProduct}=="2033", MODE="0666", OWNER="root", GROUP="plugdev"
+
+
+v
